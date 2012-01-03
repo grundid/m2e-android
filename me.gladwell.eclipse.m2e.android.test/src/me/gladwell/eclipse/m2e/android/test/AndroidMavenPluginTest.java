@@ -1,6 +1,10 @@
 package me.gladwell.eclipse.m2e.android.test;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -29,5 +33,17 @@ public class AndroidMavenPluginTest extends AndroidMavenPluginTestCase {
 		importAndroidProject(SIMPLE_PROJECT_NAME);
 		IProject project = importAndroidProject("test-project-workspace-deps");
 		assertClasspathContains(JavaCore.create(project), SIMPLE_PROJECT_NAME);
+	}
+
+	public void testBuildDirectoryContainsCompiledClassesFromWorkspaceProject() throws Exception {
+		importAndroidProject(SIMPLE_PROJECT_NAME);
+		IProject project = importAndroidProject("test-project-workspace-deps");
+		IJavaProject javaProject = JavaCore.create(project);
+		File outputLocation = new File(ResourcesPlugin.getWorkspace().getRoot().getRawLocation().toOSString(), javaProject.getPath().toOSString());
+		File classFile  = new File(outputLocation, "bin/classes/com/urbanmania/eclipse/maven/android/test/App.class");
+		
+		buildAndroidProject(project, IncrementalProjectBuilder.FULL_BUILD);
+
+		assertTrue(classFile.exists());
 	}
 }
